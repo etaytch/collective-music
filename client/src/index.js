@@ -22,6 +22,3 @@ ReactDOM.render(
 
 console.log('Stripe key is: ' + process.env.REACT_APP_STRIPE_KEY);
 console.log('Environment is: ' + process.env.NODE_ENV);
-
-// const survey = { title: 'my title', subject: 'my subject', recipients: 'etaybill@gmail.com', body: 'heres the body of the email'};
-// axios.post('/api/surveys', survey);

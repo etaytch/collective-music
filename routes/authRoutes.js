@@ -24,4 +24,28 @@ module.exports = app => {
   app.get('/api/current_user', (req, res) => {
     res.send(req.user);
   });
+
+  app.get(
+    '/auth/spotify',
+    passport.authenticate(
+      'spotify',
+      {
+        scope: [
+          'user-read-email',
+          'user-read-private',
+          'playlist-read-private'
+        ],
+        showDialog: true
+      },
+      function(res, req) {}
+    )
+  );
+
+  app.get(
+    '/auth/spotify/callback',
+    passport.authenticate('spotify'),
+    (req, res) => {
+      res.redirect('/surveys');
+    }
+  );
 };

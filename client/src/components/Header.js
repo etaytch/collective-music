@@ -5,40 +5,47 @@ import Payments from './Payments';
 
 class Header extends Component {
   renderContent() {
-    switch(this.props.auth) {
+    switch (this.props.auth) {
       case null:
         return;
       case false:
-        return (
-          <li><a href="/auth/google">Login With Google</a></li>
-        );
+        return [
+          <li key="1">
+            <a href="/auth/google">Login With Google</a>
+          </li>,
+          <li key="2">
+            <a href="/auth/spotify">Login With Spotify</a>
+          </li>
+        ];
       default:
         return [
-          <li key="1"><Payments /></li>,
-          <li key="3" style={{margin: '0 10px'}}>
+          <li key="1">
+            <Payments />
+          </li>,
+          <li key="3" style={{ margin: '0 10px' }}>
             Credits: {this.props.auth.credits}
           </li>,
-          <li key="2"><a href="/api/logout">Logout</a></li>
+          <li key="2">
+            <a href="/api/logout">Logout</a>
+          </li>
         ];
     }
   }
 
   render() {
-    return(
+    return (
       <nav>
         <div className="nav-wrapper">
-        <Link
-          to={this.props.auth ? '/surveys' : '/'}
-          className="left brand-logo"
-        >
-          Emaily
-        </Link>
-        <ul className="right">
-          {this.renderContent()}
-        </ul>
+          <Link
+            to={this.props.auth ? '/surveys' : '/'}
+            className="left brand-logo"
+          >
+            Emaily
+          </Link>
+          <ul className="right">{this.renderContent()}</ul>
         </div>
       </nav>
-    )
+    );
   }
 }
 
