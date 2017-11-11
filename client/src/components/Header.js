@@ -11,9 +11,6 @@ class Header extends Component {
       case false:
         return [
           <li key="1">
-            <a href="/auth/google">Login With Google</a>
-          </li>,
-          <li key="2">
             <a href="/auth/spotify">Login With Spotify</a>
           </li>
         ];
