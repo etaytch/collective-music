@@ -5,63 +5,46 @@ const requireCredits = require('../middlewares/requireCredits');
 const keys = require('../config/keys');
 const SpotifyWebApi = require('spotify-web-api-node');
 
-// module.exports = app => {
-//   app.get('/api/spotify/playlists', requireLogin, (req, res) => {
-//     console.log('in /api/spotify/playlists');
-//     var spotifyApi = new SpotifyWebApi({
-//       clientId: keys.spotifyClientID,
-//       clientSecret: keys.spotifyClientSecret
-//     });
-//
-//     // Retrieve an access token
-//     spotifyApi.clientCredentialsGrant().then(
-//       function(data) {
-//         console.log('The access token expires in ' + data.body['expires_in']);
-//         console.log('The access token is ' + data.body['access_token']);
-//
-//         // Save the access token so that it's used in future calls
-//         spotifyApi.setAccessToken(data.body['access_token']);
-//
-//         console.log('req.user.spotifyId: ' + req.user.spotifyId);
-//         // Get a user's playlists
-//         spotifyApi.getUserPlaylists(req.user.spotifyId).then(
-//           function(data) {
-//             console.log('Retrieved playlists', data.body);
-//           },
-//           function(err) {
-//             console.log('Something went wrong!', err);
-//           }
-//         );
-//       },
-//       function(err) {
-//         console.log(
-//           'Something went wrong when retrieving an access token',
-//           err.message
-//         );
-//       }
-//     );
-//
-//     res.send({});
-//   });
-// };
+async function getAuthenticatedClient(user) {
+  var spotifyApi = new SpotifyWebApi({
+    clientId: keys.spotifyClientID,
+    clientSecret: keys.spotifyClientSecret
+  });
 
-module.exports = app => {
+  console.log('user.accessToken: ', user.spotifyAccessToken);
+  console.log('user.refreshToken: ', user.spotifyRefreshToken);
+
+  spotifyApi.setRefreshToken(user.spotifyRefreshToken);
+  spotifyApi.setAccessToken(user.spotifyAccessToken);
+
+  try {
+    const refreshedData = await spotifyApi.refreshAccessToken();
+    console.log('Refreshed token.');
+
+    console.log('old accessToken: ', user.spotifyAccessToken);
+    console.log('new accessToken: ', refreshedData.body.access_token);
+
+    user.spotifyAccessToken = refreshedData.body.access_token;
+    user.save((err, user) => {
+      if (err) {
+        console.log('error saving user: ', user);
+      } else {
+        console.log('successfully saving user: ', user);
+      }
+    });
+  } catch (err) {
+    console.log('something went wrong', err);
+  }
+
+  console.log('im here');
+  return spotifyApi;
+}
+
+module.exports = async app => {
   app.get('/api/spotify/playlists', requireLogin, async (req, res) => {
     console.log('in /api/spotify/playlists');
-    var spotifyApi = new SpotifyWebApi({
-      clientId: keys.spotifyClientID,
-      clientSecret: keys.spotifyClientSecret
-    });
 
-    // Retrieve an access token
-    // const data = await spotifyApi.clientCredentialsGrant();
-
-    // console.log('The access token expires in ' + data.body['expires_in']);
-    // console.log('The access token is ' + data.body['access_token']);
-
-    // Save the access token so that it's used in future calls
-    // spotifyApi.setAccessToken(data.body['access_token']);
-    spotifyApi.setAccessToken(req.user.spotifyAccessToken);
+    var spotifyApi = await getAuthenticatedClient(req.user);
 
     // Get a user's playlists
     const playlists = await spotifyApi.getUserPlaylists(req.user.spotifyId);
@@ -107,6 +90,5 @@ module.exports = app => {
         tracks: tracks
       }
     ]);
-    // res.send({});
   });
 };

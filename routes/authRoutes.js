@@ -45,7 +45,7 @@ module.exports = app => {
     '/auth/spotify/callback',
     passport.authenticate('spotify'),
     (req, res) => {
-      res.redirect('/surveys');
+      res.redirect('/profile');
     }
   );
 };

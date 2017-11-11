@@ -1,12 +1,10 @@
 import { combineReducers } from 'redux';
 import { reducer as fromForm } from 'redux-form';
 import authReducer from './authReducer';
-import surveysReducer from './surveysReducer';
-import playlistsReducer from './playlistsReducer';
+import profileReducer from './profileReducer';
 
 export default combineReducers({
   auth: authReducer,
-  surveys: surveysReducer,
-  playlists: playlistsReducer,
+  profile: profileReducer,
   form: fromForm
 });

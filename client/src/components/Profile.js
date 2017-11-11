@@ -11,18 +11,17 @@ class Playlists extends Component {
   renderTracks(tracks) {
     // console.log('renderTracks tracks: ' + JSON.stringify(tracks, null, 4));
     return tracks.map(track => {
-      return <li key={track.trackId}>{track.trackName}</li>;
+      return (
+        <li key={track.trackId}>
+          ({track.trackNumber}) {track.artistName} - {track.albumName} -{' '}
+          {track.trackName}
+        </li>
+      );
     });
   }
 
   renderPlaylists() {
-    return _.map(this.props.playlists, playlist => {
-      // return (
-      //   <div key="playlist.playlistId">
-      //     <h4>Playlist Id: </h4> {playlist.playlistId}
-      //     <h5>Tracks: </h5> <ul>{this.renderTracks(playlist.tracks)}</ul>
-      //   </div>
-
+    return _.map(this.props.profile, playlist => {
       return (
         <div className="card darken-1" key={playlist.playlistInfo.id}>
           <div className="card-content">
@@ -46,10 +45,10 @@ class Playlists extends Component {
   }
 }
 
-function mapStateToProps({ auth, playlists }) {
+function mapStateToProps({ auth, profile }) {
   return {
     auth,
-    playlists
+    profile
   };
 }
 
