@@ -29,6 +29,7 @@
     "passport-spotify": "^0.3.1",
     "path-parser": "^2.1.0",
     "sendgrid": "^5.2.3",
+    "spotify-web-api-node": "^2.5.0",
     "stripe": "^5.3.0"
   }
 }
