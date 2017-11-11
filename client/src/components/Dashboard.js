@@ -5,19 +5,6 @@ import _ from 'lodash';
 import SurveyList from './surveys/SurveyList';
 
 const Dashboard = () => {
-  // renderSurveys() {
-  //   console.log(this.props.surveys);
-  //   return _.map(this.props.surveys, survey => {
-  //     return (
-  //       <div key={survey._id}>
-  //         <h4>Survey Title:</h4>
-  //         {survey.title}
-  //       </div>
-  //     );
-  //   });
-  // }
-
-  // render() {
   return (
     <div>
       <SurveyList />
@@ -28,6 +15,5 @@ const Dashboard = () => {
       </div>
     </div>
   );
-  // }
 };
 export default Dashboard;
