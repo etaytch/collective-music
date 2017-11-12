@@ -5,7 +5,8 @@ const userSchema = new Schema({
   spotifyId: String,
   spotifyAccessToken: String,
   spotifyRefreshToken: String,
-  credits: { type: Number, default: 0 }
+  spotifyDisplayName: String,
+  spotifyProfileURL: String
 });
 
 mongoose.model('users', userSchema);

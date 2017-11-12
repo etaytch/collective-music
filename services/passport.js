@@ -25,11 +25,14 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(JSON.stringify(profile, null, 4));
-      console.log('accessToken' + accessToken);
-      console.log('refreshToken' + refreshToken);
-      console.log('profile username:' + profile.username);
-      console.log('profile country :' + profile.country);
-      console.log('profile id:' + profile.id);
+      console.log('accessToken', accessToken);
+      console.log('refreshToken', refreshToken);
+      console.log('profile username:', profile.displayName);
+      console.log('profile URL :', profile.profileUrl);
+      console.log('profile id:', profile.id);
+      let image =
+        profile._json.images.length > 0 ? profile._json.images[0] : '';
+      console.log('profile images:', image);
       const existingUser = await User.findOne({ spotifyId: profile.id });
 
       if (existingUser) {
@@ -39,7 +42,9 @@ passport.use(
       const user = await new User({
         spotifyId: profile.id,
         spotifyAccessToken: accessToken,
-        spotifyRefreshToken: refreshToken
+        spotifyRefreshToken: refreshToken,
+        spotifyDisplayName: profile.displayName,
+        spotifyProfileURL: profile.profileUrl
       }).save();
       console.log('user: ' + user);
       done(null, user);
