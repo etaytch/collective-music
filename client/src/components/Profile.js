@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { fecthPlaylists } from '../actions';
 import _ from 'lodash';
 
-class Playlists extends Component {
+class Profile extends Component {
   componentDidMount() {
     this.props.fecthPlaylists();
   }
@@ -21,25 +21,66 @@ class Playlists extends Component {
   }
 
   renderPlaylists() {
-    return _.map(this.props.profile, playlist => {
+    if (this.props.profile.length < 1) {
       return (
-        <div className="card darken-1" key={playlist.playlistInfo.id}>
-          <div className="card-content">
-            <span className="card-title">
-              Playlist: {playlist.playlistInfo.name}
-            </span>
-            Tracks: <ul>{this.renderTracks(playlist.tracks)}</ul>
-          </div>
+        <div>
+          <h3>Loading user playlists...</h3>
         </div>
       );
-    });
+    } else {
+      const playlists = _.map(this.props.profile, playlist => {
+        return (
+          <div className="card darken-1" key={playlist.playlistInfo.id}>
+            <div className="card-content">
+              <span className="card-title">
+                Playlist: {playlist.playlistInfo.name}
+              </span>
+              Tracks: <ul>{this.renderTracks(playlist.tracks)}</ul>
+            </div>
+          </div>
+        );
+      });
+
+      return (
+        <div>
+          <h3>Playlists:</h3>
+          {playlists}
+        </div>
+      );
+    }
+  }
+
+  showUser() {
+    if (this.props.auth) {
+      return (
+        <div>
+          <h3>User Info:</h3>
+          <h5>
+            DisplayName:{' '}
+            <a target="_blank" href={this.props.auth.spotifyProfileURL}>
+              {this.props.auth.spotifyDisplayName}
+            </a>
+          </h5>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <h3>Loading user info...</h3>
+        </div>
+      );
+    }
+    console.log('showUser:', this.props.auth);
+    // return ({ this.props.auth.spotifyDisplayName ? this.props.auth.spotifyDisplayName : 'Loading..' });
   }
 
   render() {
     return (
       <div>
-        <h2>Playlists:</h2>
-        {this.renderPlaylists()}
+        <div>
+          {this.showUser()}
+          {this.renderPlaylists()}
+        </div>
       </div>
     );
   }
@@ -52,4 +93,4 @@ function mapStateToProps({ auth, profile }) {
   };
 }
 
-export default connect(mapStateToProps, { fecthPlaylists })(Playlists);
+export default connect(mapStateToProps, { fecthPlaylists })(Profile);

@@ -14,15 +14,21 @@ class Header extends Component {
           </li>
         );
       default:
-        return (
+        return [
           <li key="2">
             <a href="/api/logout">Logout</a>
+          </li>,
+          <li key="1">
+            <a href="/profile">
+              <i className="large material-icons">account_circle</i>
+            </a>
           </li>
-        );
+        ];
     }
   }
 
   render() {
+    console.log(this);
     return (
       <nav>
         <div className="nav-wrapper">
