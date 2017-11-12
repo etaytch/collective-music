@@ -20,7 +20,8 @@ passport.use(
     {
       clientID: keys.spotifyClientID,
       clientSecret: keys.spotifyClientSecret,
-      callbackURL: '/auth/spotify/callback'
+      callbackURL: '/auth/spotify/callback',
+      proxy: true
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(JSON.stringify(profile, null, 4));
