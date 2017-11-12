@@ -25,6 +25,7 @@
     "lodash": "^4.17.4",
     "mongoose": "^4.13.0",
     "passport": "^0.4.0",
+    "passport-facebook": "^2.1.1",
     "passport-google-oauth20": "^1.0.0",
     "passport-spotify": "^0.3.1",
     "passport-youtube-v3": "^2.1.0",

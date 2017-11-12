@@ -26,6 +26,21 @@ module.exports = app => {
   );
 
   app.get(
+    '/auth/facebook',
+    passport.authenticate('facebook', {
+      scope: ['public_profile', 'email']
+    })
+  );
+
+  app.get(
+    '/auth/facebook/callback',
+    passport.authenticate('facebook'),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
+
+  app.get(
     '/auth/spotify',
     passport.authenticate('spotify', {
       scope: ['user-read-email', 'user-read-private', 'playlist-read-private'],
