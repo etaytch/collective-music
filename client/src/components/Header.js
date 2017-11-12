@@ -13,6 +13,9 @@ class Header extends Component {
             <a href="/auth/spotify">Login With Spotify</a>
           </li>,
           <li key="2">
+            <a href="/auth/facebook">Login With Facebook</a>
+          </li>,
+          <li key="3">
             <a href="/auth/google">Login With Google</a>
           </li>
         ];
