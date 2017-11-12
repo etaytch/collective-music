@@ -36,8 +36,45 @@ async function getAuthenticatedClient(user) {
     console.log('something went wrong', err);
   }
 
-  console.log('im here');
   return spotifyApi;
+}
+
+async function getAllPlaylistsTracks(spotifyApi, spotifyId, playlists) {
+  return await Promise.all(
+    _.map(playlists, async playlist => {
+      const playlistInfo = {
+        id: playlist.id,
+        name: playlist.name
+      };
+
+      const playlistTracks = await spotifyApi.getPlaylistTracks(
+        spotifyId,
+        playlist.id
+      );
+
+      const tracks = _.map(playlistTracks.body.items, plItem => {
+        return {
+          artistId: plItem.track.artists[0].id,
+          artistType: plItem.track.artists[0].type,
+          artistName: plItem.track.artists[0].name,
+
+          albumId: plItem.track.album.id,
+          albumType: plItem.track.album.type,
+          albumName: plItem.track.album.name,
+
+          trackId: plItem.track.id,
+          trackName: plItem.track.name,
+          trackType: plItem.track.type,
+          trackNumber: plItem.track.track_number
+        };
+      });
+
+      return {
+        playlistInfo: playlistInfo,
+        tracks: tracks
+      };
+    })
+  );
 }
 
 module.exports = async app => {
@@ -48,47 +85,14 @@ module.exports = async app => {
 
     // Get a user's playlists
     const playlists = await spotifyApi.getUserPlaylists(req.user.spotifyId);
-    console.log(
-      'Retrieved playlists, playlist #1 id: ',
-      playlists.body.items[0].id
-    );
 
-    const playlistTracks = await spotifyApi.getPlaylistTracks(
+    const result = await getAllPlaylistsTracks(
+      spotifyApi,
       req.user.spotifyId,
-      playlists.body.items[0].id
+      playlists.body.items
     );
+    console.log('result: ' + JSON.stringify(result, null, 4));
 
-    const playlistInfo = {
-      id: playlists.body.items[0].id,
-      name: playlists.body.items[0].name
-    };
-
-    console.log(
-      'playlistTracks details: ' + JSON.stringify(playlistTracks.body, null, 4)
-    );
-
-    const tracks = _.map(playlistTracks.body.items, plItem => {
-      return {
-        artistId: plItem.track.artists[0].id,
-        artistType: plItem.track.artists[0].type,
-        artistName: plItem.track.artists[0].name,
-
-        albumId: plItem.track.album.id,
-        albumType: plItem.track.album.type,
-        albumName: plItem.track.album.name,
-
-        trackId: plItem.track.id,
-        trackName: plItem.track.name,
-        trackType: plItem.track.type,
-        trackNumber: plItem.track.track_number
-      };
-    });
-
-    res.send([
-      {
-        playlistInfo: playlistInfo,
-        tracks: tracks
-      }
-    ]);
+    res.send(result);
   });
 };
