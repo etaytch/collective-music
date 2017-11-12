@@ -40,58 +40,71 @@ async function getAuthenticatedClient(user) {
 }
 
 async function getAllPlaylistsTracks(spotifyApi, spotifyId, playlists) {
-  return await Promise.all(
-    _.map(playlists, async playlist => {
-      const playlistInfo = {
-        id: playlist.id,
-        name: playlist.name
-      };
-
-      const playlistTracks = await spotifyApi.getPlaylistTracks(
-        spotifyId,
-        playlist.id
-      );
-
-      const tracks = _.map(playlistTracks.body.items, plItem => {
-        return {
-          artistId: plItem.track.artists[0].id,
-          artistType: plItem.track.artists[0].type,
-          artistName: plItem.track.artists[0].name,
-
-          albumId: plItem.track.album.id,
-          albumType: plItem.track.album.type,
-          albumName: plItem.track.album.name,
-
-          trackId: plItem.track.id,
-          trackName: plItem.track.name,
-          trackType: plItem.track.type,
-          trackNumber: plItem.track.track_number
+  try {
+    console.log('playlists length: ', playlists.length);
+    var allPlaylists = await Promise.all(
+      _.map(playlists, async playlist => {
+        const playlistInfo = {
+          id: playlist.id,
+          name: playlist.name
         };
-      });
+        var playlistTracks;
+        try {
+          playlistTracks = await spotifyApi.getPlaylistTracks(
+            spotifyId,
+            playlist.id
+          );
+        } catch (err) {
+          console.log(`error with playlistId: ${playlist.id}. Error: ${err}`);
+          return;
+        }
+        const tracks = _.map(playlistTracks.body.items, plItem => {
+          return {
+            artistId: plItem.track.artists[0].id,
+            artistType: plItem.track.artists[0].type,
+            artistName: plItem.track.artists[0].name,
 
-      return {
-        playlistInfo: playlistInfo,
-        tracks: tracks
-      };
-    })
-  );
+            albumId: plItem.track.album.id,
+            albumType: plItem.track.album.type,
+            albumName: plItem.track.album.name,
+
+            trackId: plItem.track.id,
+            trackName: plItem.track.name,
+            trackType: plItem.track.type,
+            trackNumber: plItem.track.track_number
+          };
+        });
+
+        var result = {
+          playlistInfo: playlistInfo,
+          tracks: tracks
+        };
+
+        return result;
+      })
+    );
+  } catch (err) {
+    console.log('err: ', err);
+  }
+
+  console.log('allPlaylists: ' + JSON.stringify(allPlaylists, null, 4));
+  return _.filter(allPlaylists, playlist => playlist);
 }
 
 module.exports = async app => {
   app.get('/api/spotify/playlists', requireLogin, async (req, res) => {
     console.log('in /api/spotify/playlists');
-
+    var user = req.user;
     var spotifyApi = await getAuthenticatedClient(req.user);
 
     // Get a user's playlists
-    const playlists = await spotifyApi.getUserPlaylists(req.user.spotifyId);
+    const playlists = await spotifyApi.getUserPlaylists(user.spotifyId);
 
     const result = await getAllPlaylistsTracks(
       spotifyApi,
-      req.user.spotifyId,
+      user.spotifyId,
       playlists.body.items
     );
-    console.log('result: ' + JSON.stringify(result, null, 4));
 
     res.send(result);
   });
