@@ -26,7 +26,7 @@ passport.use(
       console.log(JSON.stringify(profile, null, 4));
       console.log('accessToken' + accessToken);
       console.log('refreshToken' + refreshToken);
-      console.log('profile email:' + profile.emai);
+      console.log('profile username:' + profile.username);
       console.log('profile country :' + profile.country);
       console.log('profile id:' + profile.id);
       const existingUser = await User.findOne({ spotifyId: profile.id });

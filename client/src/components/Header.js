@@ -9,11 +9,11 @@ class Header extends Component {
       case null:
         return;
       case false:
-        return [
+        return (
           <li key="1">
             <a href="/auth/spotify">Login With Spotify</a>
           </li>
-        ];
+        );
       default:
         return [
           <li key="1">
