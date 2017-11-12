@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "proxy": {
-    "/auth/*": {
+    "/auth/spotify/*": {
       "target": "http://localhost:5000"
     },
-    "/api/*": {
+    "/api/current_user": {
       "target": "http://localhost:5000"
     },
     "/api/spotify/*": {
