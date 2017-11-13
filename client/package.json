@@ -11,6 +11,9 @@
     },
     "/api/spotify/*": {
       "target": "http://localhost:5000"
+    },
+    "/api/youtube/*": {
+      "target": "http://localhost:5000"
     }
   },
   "dependencies": {

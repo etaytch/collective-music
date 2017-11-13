@@ -1,6 +1,9 @@
 import axios from 'axios';
-import { FETCH_USER } from './types';
-import { FETCH_PLAYLISTS } from './types';
+import {
+  FETCH_USER,
+  FETCH_SPOTIFY_PLAYLISTS,
+  FETCH_YOUTUBE_PLAYLISTS
+} from './types';
 
 export const fetchUser = () => async dispatch => {
   const res = await axios.get('/api/current_user');
@@ -15,5 +18,11 @@ export const handleToken = token => async dispatch => {
 
 export const fecthSpotifyPlaylists = () => async dispatch => {
   const res = await axios.get('/api/spotify/playlists');
-  dispatch({ type: FETCH_PLAYLISTS, payload: res.data });
+  dispatch({ type: FETCH_SPOTIFY_PLAYLISTS, payload: res.data });
+};
+
+export const fecthYoutubePlaylists = () => async dispatch => {
+  const res = await axios.get('/api/youtube/playlists');
+  console.log('fecthYoutubePlaylists res.data: ', res.data);
+  dispatch({ type: FETCH_YOUTUBE_PLAYLISTS, payload: res.data });
 };
