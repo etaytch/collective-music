@@ -13,6 +13,9 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((id, done) => {
   User.findById(id).then(user => {
+    if (user.spotify) {
+      user.spotify = {}; // don't send spotify data to client
+    }
     done(null, user);
   });
 });
@@ -23,33 +26,32 @@ passport.use(
       clientID: keys.spotifyClientID,
       clientSecret: keys.spotifyClientSecret,
       callbackURL: '/auth/spotify/callback',
-      proxy: true
+      proxy: true,
+      passReqToCallback: true
     },
-    async (accessToken, refreshToken, profile, done) => {
-      console.log(JSON.stringify(profile, null, 4));
-      console.log('accessToken', accessToken);
-      console.log('refreshToken', refreshToken);
-      console.log('profile username:', profile.displayName);
-      console.log('profile URL :', profile.profileUrl);
-      console.log('profile id:', profile.id);
-      let image =
-        profile._json.images.length > 0 ? profile._json.images[0] : '';
-      console.log('profile images:', image);
-      const existingUser = await User.findOne({ spotifyId: profile.id });
+    async (req, accessToken, refreshToken, profile, done) => {
+      console.log('SpotifyStrategy req.user: ', req.user);
 
-      if (existingUser) {
-        return done(null, existingUser);
-      }
-
-      const user = await new User({
-        spotifyId: profile.id,
-        spotifyAccessToken: accessToken,
-        spotifyRefreshToken: refreshToken,
-        spotifyDisplayName: profile.displayName,
-        spotifyProfileURL: profile.profileUrl
-      }).save();
-      console.log('user: ' + user);
-      done(null, user);
+      // const existingUser = await User.findOne({ _id: req.user._id });
+      // console.log('existingUser: ', existingUser);
+      User.updateOne(
+        {
+          _id: req.user._id
+        },
+        {
+          $set: {
+            spotify: {
+              spotifyId: profile.id,
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              displayName: profile.displayName,
+              profileURL: profile.profileUrl
+            },
+            lastUpdated: new Date()
+          }
+        }
+      ).exec();
+      return done(null, req.user);
 
       // User.findOrCreate({ spotifyId: profile.id }, function(err, user) {
       //   return done(err, user);

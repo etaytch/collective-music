@@ -1,14 +1,12 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const spotifyTokensSchema = require('./spotifyTokens');
 
 const userSchema = new Schema({
   googleId: String,
   facebookId: String,
-  spotifyId: String,
-  spotifyAccessToken: String,
-  spotifyRefreshToken: String,
-  spotifyDisplayName: String,
-  spotifyProfileURL: String
+  spotify: spotifyTokensSchema,
+  lastUpdated: Date
 });
 
 mongoose.model('users', userSchema);

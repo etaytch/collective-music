@@ -4,6 +4,7 @@ const requireLogin = require('../middlewares/requireLogin');
 const requireCredits = require('../middlewares/requireCredits');
 const keys = require('../config/keys');
 const SpotifyWebApi = require('spotify-web-api-node');
+const User = mongoose.model('users');
 
 async function getAuthenticatedClient(user) {
   var spotifyApi = new SpotifyWebApi({
@@ -11,20 +12,20 @@ async function getAuthenticatedClient(user) {
     clientSecret: keys.spotifyClientSecret
   });
 
-  console.log('user.accessToken: ', user.spotifyAccessToken);
-  console.log('user.refreshToken: ', user.spotifyRefreshToken);
+  console.log('user.accessToken: ', user.spotify.accessToken);
+  console.log('user.refreshToken: ', user.spotify.refreshToken);
 
-  spotifyApi.setRefreshToken(user.spotifyRefreshToken);
-  spotifyApi.setAccessToken(user.spotifyAccessToken);
+  spotifyApi.setAccessToken(user.spotify.accessToken);
+  spotifyApi.setRefreshToken(user.spotify.refreshToken);
 
   try {
     const refreshedData = await spotifyApi.refreshAccessToken();
     console.log('Refreshed token.');
 
-    console.log('old accessToken: ', user.spotifyAccessToken);
+    console.log('old accessToken: ', user.spotify.accessToken);
     console.log('new accessToken: ', refreshedData.body.access_token);
 
-    user.spotifyAccessToken = refreshedData.body.access_token;
+    user.spotify.accessToken = refreshedData.body.access_token;
     user.save((err, user) => {
       if (err) {
         console.log('error saving user: ', user);
@@ -93,19 +94,37 @@ async function getAllPlaylistsTracks(spotifyApi, spotifyId, playlists) {
 
 module.exports = async app => {
   app.get('/api/spotify/playlists', requireLogin, async (req, res) => {
-    console.log('in /api/spotify/playlists');
-    var user = req.user;
-    var spotifyApi = await getAuthenticatedClient(req.user);
+    console.log('in /api/spotify/playlists, req.user: ', req.user);
+
+    const user = await User.findOne({ _id: req.user._id });
+    console.log('user: ', user);
+    // var user = req.user;
+    var spotifyApi = await getAuthenticatedClient(user);
 
     // Get a user's playlists
-    const playlists = await spotifyApi.getUserPlaylists(user.spotifyId);
+    var playlists;
+    try {
+      console.log('user.spotify.spotifyId: ', user.spotify.spotifyId);
+      playlists = await spotifyApi.getUserPlaylists(user.spotify.spotifyId);
+      console.log('playlists: ', playlists);
+    } catch (err) {
+      console.log('unable to fetch playlists, err: ', err);
+    }
 
-    const result = await getAllPlaylistsTracks(
+    const playlistsWithTracks = await getAllPlaylistsTracks(
       spotifyApi,
-      user.spotifyId,
+      user.spotify.spotifyId,
       playlists.body.items
     );
 
+    const result = {
+      user: {
+        displayName: user.spotify.displayName,
+        profileURL: user.spotify.profileURL
+      },
+      playlists: playlistsWithTracks
+    };
+    console.log('out /api/spotify/playlists');
     res.send(result);
   });
 };
