@@ -25,6 +25,13 @@ class Youtube extends Component {
           <h3>Loading user playlists...</h3>
         </div>
       );
+    } else if (this.props.youtube.err) {
+      return (
+        <div>
+          <h3>Error loading user playlists...</h3>
+          {this.props.youtube.err.errors[0].message}
+        </div>
+      );
     } else {
       console.log('youtube playlists: ', this.props.youtube.playlists);
 

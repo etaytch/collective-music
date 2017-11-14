@@ -20,6 +20,22 @@ module.exports = async app => {
     });
   }
 
+  function getChannels(youtubeApi) {
+    return new Promise(function(resolve, reject) {
+      youtubeApi.channels.list(
+        {
+          part: 'id,snippet',
+          mine: true,
+          headers: {}
+        },
+        function(err, data, response) {
+          if (err !== null) return reject(err);
+          resolve(data);
+        }
+      );
+    });
+  }
+
   app.get('/api/youtube/playlists', requireLogin, async (req, res) => {
     const user = await User.findOne({ _id: req.user._id });
 
@@ -29,36 +45,63 @@ module.exports = async app => {
     );
 
     try {
-      const playlists = await getPlaylists(youtubeApi);
-      console.log('playlists: ', playlists);
+      var channels;
+      try {
+        channels = await getChannels(youtubeApi);
+        console.log('channels: ', channels);
+      } catch (err) {
+        handleError(user, "unable to get user's channel!", err, res);
+        return;
+      }
 
-      const playlistsWithTracks = await getAllPlaylistsTracks(
-        youtubeApi,
-        playlists
-      );
+      // For now we'll process only the first channel
+      const firstChannelId = channels.items[0].id;
+      var playlists;
+      try {
+        playlists = await getPlaylists(youtubeApi, firstChannelId);
+        console.log('playlists: ', playlists);
+      } catch (err) {
+        handleError(user, "unable to get user's channel's playlist!", err, res);
+        return;
+      }
 
-      console.log('playlistsWithTracks: ', playlistsWithTracks);
+      var playlistsWithTracks;
+      try {
+        playlistsWithTracks = await getAllPlaylistsTracks(
+          youtubeApi,
+          playlists
+        );
 
-      const result = {
-        user: {
-          displayName: user.youtube.displayName,
-          profileURL: user.youtube.youtubeId
-        },
-        playlists: playlistsWithTracks
-      };
+        console.log('playlistsWithTracks: ', playlistsWithTracks);
+        const result = {
+          user: {
+            displayName: user.youtube.displayName,
+            profileURL: user.youtube.youtubeId
+          },
+          playlists: playlistsWithTracks
+        };
+        res.send(result);
+      } catch (err) {
+        handleError(
+          user,
+          "unable to get user's channel's playlist's tracks!",
+          err,
+          res
+        );
+        return;
+      }
       console.log('out /api/spotify/playlists');
-      res.send(result);
     } catch (err) {
       console.log('error getting playlists: ', err);
     }
   });
 
-  function getPlaylists(youtubeApi) {
+  function getPlaylists(youtubeApi, channelId) {
     return new Promise(function(resolve, reject) {
       youtubeApi.playlists.list(
         {
           part: 'id,snippet',
-          channelId: 'UCSUojj6o5X27tPZOF4Ypoug',
+          channelId: channelId, //'UCSUojj6o5X27tPZOF4Ypoug',
           headers: {}
         },
         function(err, data, response) {
@@ -122,5 +165,15 @@ module.exports = async app => {
     });
   }
 
-  var scopes = ['https://www.googleapis.com/auth/youtube'];
+  function handleError(user, log, err, res) {
+    console.log(log);
+    const result = {
+      user: {
+        displayName: user.youtube.displayName,
+        profileURL: user.youtube.youtubeId
+      },
+      err: err
+    };
+    res.send(result);
+  }
 };
