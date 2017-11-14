@@ -56,4 +56,21 @@ module.exports = app => {
       res.redirect('/profile');
     }
   );
+
+  app.get(
+    '/auth/youtube',
+    passport.authenticate('youtube', {
+      scope: ['https://www.googleapis.com/auth/youtube.readonly'],
+      showDialog: true
+    }),
+    function(res, req) {}
+  );
+
+  app.get(
+    '/auth/youtube/callback',
+    passport.authenticate('youtube'),
+    (req, res) => {
+      res.redirect('/profile');
+    }
+  );
 };
